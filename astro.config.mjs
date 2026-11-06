@@ -24,6 +24,8 @@ export default defineConfig({
     }],
 
     integrations: [lottie(), mdx(), sitemap({
+        // Pages marked noindex should not be advertised in the sitemap.
+        filter: (page) => !page.includes("/policies/legalNotice"),
         serialize(item) {
             item.url = withIndexHtml(item.url);
             return item;
