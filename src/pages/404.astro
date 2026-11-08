@@ -1,30 +1,178 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
-import Heading from "../components/Heading.astro";
-import Paragraph from "../components/Paragraph.astro";
 
 const frontmatter = {
-    title: "Don't Panic | Page Not Found",
-    description: "The page you're looking for doesn't exist.",
-    noindex: true,
+  title: "Don't Panic | Page Not Found",
+  description: "The page you're looking for doesn't exist.",
+  noindex: true,
 };
 ---
 
 <Layout {...{ frontmatter }}>
-    <Header />
-    <div class="not-found">
-        <Heading>Page not found</Heading>
-        <Paragraph>
-            The page you're looking for doesn't exist. Head back to <a href="/">the homepage</a>.
-        </Paragraph>
+  <Header />
+  <div class="not-found">
+    <p class="code">
+      <span class="visually-hidden">Error 404</span>
+      <span class="digits" aria-hidden="true"
+        ><span class="digit" style="--delay: 0s">4</span><span
+          class="digit"
+          style="--delay: 0.8s">0</span
+        ><span class="digit" style="--delay: 1.6s">4</span></span
+      >
+    </p>
+    <div class="message">
+      <a class="home" href="/">Take me home, as</a>
+      <h1>this is not the page you are looking for.</h1>
     </div>
+  </div>
 </Layout>
 
 <style>
-    .not-found {
-        margin: 0 8% 3rem;
-        padding: 0 1rem;
-        min-height: 40vh;
+  .not-found {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    align-items: center;
+    align-content: center;
+    min-height: 60vh;
+    padding: 2rem 0 4rem;
+  }
+
+  .code {
+    grid-column: 1 / span 5;
+    justify-self: end;
+    margin: 0 5rem 0 0;
+    font-size: clamp(6rem, 14vw, 12rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #b31b1b;
+    white-space: nowrap;
+  }
+
+  /* Each digit fades in slowly, one after the other. */
+  .digit {
+    display: inline-block;
+    animation: fade-in 1.9s ease-in var(--delay, 0s) both;
+  }
+
+  /* Black strike-through, echoing the line through "panic" in the logo.
+       It draws across once the digits have faded in. */
+  .digits {
+    position: relative;
+    display: inline-block;
+  }
+
+  .digits::after {
+    content: "";
+    position: absolute;
+    left: -0.08em;
+    right: -0.08em;
+    /* Through the middle of the 0; 0.052em is 10px at the 12rem desktop size. */
+    top: calc(52% - 0.052em);
+    height: 0.07em;
+    border-radius: 0.035em;
+    background: #1a1a1a;
+    transform-origin: left center;
+    animation: strike 0.8s ease-out 3s both;
+  }
+
+  @keyframes strike {
+    from {
+      transform: scaleX(0);
     }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .message {
+    grid-column: 6 / span 6;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #1a1a1a;
+  }
+
+  /* Red lead-in above the headline, like "(Together, we)" on the homepage,
+       with the header nav's red underline drawing in on hover. */
+  .home {
+    display: inline-block;
+    margin: 0 0 0.75rem;
+    color: #b31b1b;
+    font-size: 1.25rem;
+  }
+
+  .home::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background-color: #b31b1b;
+    transform-origin: right;
+    transform: scaleX(0);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .home:hover::before,
+  .home:focus-visible::before {
+    transform-origin: left;
+    transform: scaleX(1);
+  }
+
+  .home:focus-visible {
+    outline: 2px solid #1a1a1a;
+    outline-offset: 6px;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .digit,
+    .digits::after {
+      animation: none;
+    }
+  }
+
+  @media screen and (max-width: 900px) {
+    .code {
+      grid-column: 1 / -1;
+      justify-self: start;
+      margin: 0 10% 0.5rem;
+    }
+
+    .message {
+      grid-column: 1 / -1;
+      margin: 0 10%;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+    }
+  }
 </style>
