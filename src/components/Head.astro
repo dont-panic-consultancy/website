@@ -8,6 +8,7 @@ import { withIndexHtml } from "../utils/withIndexHtml";
 
 const { frontmatter, structuredData } = Astro.props,
     title = frontmatter.title,
+    ogTitle = frontmatter.ogTitle ?? frontmatter.title,
     description = frontmatter.description,
     image = frontmatter.image,
     noindex = frontmatter.noindex,
@@ -45,7 +46,7 @@ const { frontmatter, structuredData } = Astro.props,
     <>
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalURL} />
-        <meta property="og:title" content={title} />
+        <meta property="og:title" content={ogTitle} />
         {description && <meta property="og:description" content={description} />}
     </>
 )}

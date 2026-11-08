@@ -5,25 +5,75 @@ import Contact from "../components/Contact.astro";
 import Layout from "../layouts/Layout.astro";
 
 const frontmatter = {
-	title: "Don't Panic Consultancy",
-	description: "Transforming challenges into possibilities",
+	title: "Eelco Meuter | Don't Panic | Digital platforms, data & AI",
+	ogTitle: "Eelco Meuter | Don't Panic Consultancy",
+	description:
+		"Eelco Meuter finds where to start when IT gets too big to grasp, then sets the vision and architecture your teams can deliver. For multinationals and start-ups.",
 	image: "https://dont-panic.eu/og-image.png",
 };
 
 const structuredData = {
 	"@context": "https://schema.org",
 	"@type": "ProfessionalService",
+	"@id": "https://dont-panic.eu/#business",
 	name: "Don't Panic Consultancy",
 	url: "https://dont-panic.eu",
 	logo: "https://dont-panic.eu/icon-512.png",
+	image: "https://dont-panic.eu/og-image.png",
 	description:
-		"Boutique IT consultancy specializing in digital transformation, (enterprise) architecture, business strategy, and innovation.",
+		"Eelco Meuter finds where to start when IT gets too big to grasp, then sets the vision and architecture your teams can deliver. Digital platforms, data and AI, for multinationals and start-ups.",
+	// Country level only: the street address stays in the legal notice.
+	address: { "@type": "PostalAddress", addressCountry: "DE" },
+	areaServed: [
+		{ "@type": "Country", name: "Germany" },
+		{ "@type": "Country", name: "Netherlands" },
+		{ "@type": "Place", name: "Europe" },
+	],
+	knowsAbout: [
+		"Strategic IT consultancy",
+		"Enterprise architecture",
+		"Solution architecture",
+		"API architecture",
+		"Digital platforms",
+		"Platform engineering",
+		"Data governance",
+		"Machine learning",
+		"Artificial intelligence",
+		"Conversational AI",
+		"Full-stack development",
+		"Digital transformation",
+	],
+	// No email or phone here: the contact section protects the address from scrapers.
+	contactPoint: {
+		"@type": "ContactPoint",
+		contactType: "sales",
+		url: "https://dont-panic.eu/#contact",
+		availableLanguage: ["English", "Dutch", "German"],
+	},
+	hasOfferCatalog: {
+		"@type": "OfferCatalog",
+		name: "Services",
+		itemListElement: [
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Strategic IT consultancy" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Interim technology leadership" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Data, machine learning and AI" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Enterprise and solution architecture" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Platform engineering" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Data governance" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Digital transformation" } },
+			{ "@type": "Offer", itemOffered: { "@type": "Service", name: "Full-stack development" } },
+		],
+	},
 	founder: {
 		"@type": "Person",
+		"@id": "https://dont-panic.eu/#eelco",
 		name: "Eelco Meuter",
-		sameAs: "https://www.linkedin.com/in/meuter/",
+		jobTitle: "Founder",
+		url: "https://dont-panic.eu/#about",
+		knowsAbout: ["Digital platforms", "Enterprise architecture", "Data", "Artificial intelligence", "Full-stack development"],
+		sameAs: ["https://www.linkedin.com/in/meuter/", "https://eelcomeuter.substack.com"],
 	},
-	sameAs: ["https://www.linkedin.com/in/meuter/"],
+	sameAs: ["https://www.linkedin.com/in/meuter/", "https://eelcomeuter.substack.com"],
 };
 ---
 

@@ -1,0 +1,26 @@
+---
+// Landing page for the contact link's bot trap. The "let's chat" link in
+// Contact.astro points to no-bots/ and is rewritten into the real mailto:
+// address by JavaScript, so only clients that don't run JS end up there.
+// CloudFront serves this page (built to /418/index.html) for /no-bots/,
+// with status 418 (see teapot_path in the infrastructure repo).
+import StatusPage from "../components/StatusPage.astro";
+
+const frontmatter = {
+  title: "Don't Panic | I'm a Teapot",
+  description: "Privacy data is obscured from bots.",
+  noindex: true,
+};
+---
+
+<StatusPage
+  code="418"
+  headline="my private data is obscured for bots."
+  {frontmatter}
+>
+  Human? Please, contact me via <a
+    href="https://www.linkedin.com/in/meuter/"
+    target="_blank"
+    rel="noopener noreferrer">LinkedIn</a
+  >.
+</StatusPage>

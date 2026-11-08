@@ -1,0 +1,212 @@
+---
+// Shared layout for status pages (404, 418): a large red status code that
+// fades in digit by digit and is struck through in black, next to a red
+// "Take me home, as" lead-in link and a headline. Anything passed as
+// children appears as a short note under the headline.
+import Layout from "../layouts/Layout.astro";
+import Header from "./Header.astro";
+
+interface Props {
+  code: string;
+  headline: string;
+  frontmatter: { title: string; description: string; noindex?: boolean };
+}
+
+const { code, headline, frontmatter } = Astro.props;
+const digits = [...code];
+---
+
+<Layout {...{ frontmatter }}>
+  <Header />
+  <div class="status" id="content">
+    <p class="code">
+      <span class="visually-hidden">Error {code}</span>
+      <span class="digits" aria-hidden="true"
+        >{
+          digits.map((digit, i) => (
+            <span class="digit" style={`--delay: ${i * 0.8}s`}>
+              {digit}
+            </span>
+          ))
+        }</span
+      >
+    </p>
+    <div class="message">
+      <a class="home" href="/">Take me home, as</a>
+      <h1>{headline}</h1>
+      {
+        Astro.slots.has("default") && (
+          <p class="note">
+            <slot />
+          </p>
+        )
+      }
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .status {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    align-items: center;
+    align-content: center;
+    min-height: 60vh;
+    padding: 2rem 0 4rem;
+  }
+
+  .code {
+    grid-column: 1 / span 5;
+    justify-self: end;
+    margin: 0 5rem 0 0;
+    font-size: clamp(6rem, 14vw, 12rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #b31b1b;
+    white-space: nowrap;
+  }
+
+  /* Each digit fades in slowly, one after the other. */
+  .digit {
+    display: inline-block;
+    animation: fade-in 1.9s ease-in var(--delay, 0s) both;
+  }
+
+  /* Black strike-through, echoing the line through "panic" in the logo.
+       It draws across once the digits have faded in. */
+  .digits {
+    position: relative;
+    display: inline-block;
+  }
+
+  .digits::after {
+    content: "";
+    position: absolute;
+    left: -0.08em;
+    right: -0.08em;
+    /* Through the middle of the digits; 0.052em is 10px at the 12rem desktop size. */
+    top: calc(52% - 0.052em);
+    height: 0.07em;
+    border-radius: 0.035em;
+    background: #1a1a1a;
+    transform-origin: left center;
+    animation: strike 0.8s ease-out 3s both;
+  }
+
+  @keyframes strike {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .message {
+    grid-column: 6 / span 6;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #1a1a1a;
+  }
+
+  /* Red lead-in above the headline, like "(Together, we)" on the homepage,
+       with the header nav's red underline drawing in on hover. */
+  .home {
+    display: inline-block;
+    margin: 0 0 0.75rem;
+    color: #b31b1b;
+    font-size: 1.25rem;
+  }
+
+  .home::before,
+  .note :global(a)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background-color: #b31b1b;
+    transform-origin: right;
+    transform: scaleX(0);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .home:hover::before,
+  .home:focus-visible::before,
+  .note :global(a:hover)::before,
+  .note :global(a:focus-visible)::before {
+    transform-origin: left;
+    transform: scaleX(1);
+  }
+
+  .home:focus-visible,
+  .note :global(a:focus-visible) {
+    outline: 2px solid #1a1a1a;
+    outline-offset: 6px;
+  }
+
+  /* Short note under the headline, e.g. the human route on the 418 page. */
+  .note {
+    margin: 1.5rem 0 0;
+    font-size: 1.25rem;
+    color: #333;
+  }
+
+  .note :global(a) {
+    margin: 0;
+    font-size: inherit;
+    color: #b31b1b;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .digit,
+    .digits::after {
+      animation: none;
+    }
+  }
+
+  @media screen and (max-width: 900px) {
+    .code {
+      grid-column: 1 / -1;
+      justify-self: start;
+      margin: 0 10% 0.5rem;
+    }
+
+    .message {
+      grid-column: 1 / -1;
+      margin: 0 10%;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+    }
+  }
+</style>

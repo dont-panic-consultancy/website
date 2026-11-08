@@ -43,7 +43,11 @@
 		gap: 0.5rem 2rem;
 	}
 
+	/* At least 24px tall so each link meets the WCAG 2.5.8 target size. */
 	nav a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 24px;
 		text-decoration: none;
 		font-size: 0.9rem;
 		color: white;

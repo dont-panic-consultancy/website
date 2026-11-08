@@ -9,12 +9,33 @@ const { frontmatter, structuredData } = Astro.props;
 <html lang="en">
 	<Head {...{ frontmatter, structuredData }} />
 	<body>
+		<a class="skip-link" href="#content">Skip to content</a>
 		<main>
 			<slot />
 			<Footer />
 		</main>
 	</body>
 </html>
+
+<script>
+	// Lottie animations (coffee, falling letters) are started by
+	// astro-integration-lottie, which ignores prefers-reduced-motion.
+	// For visitors who ask for reduced motion, show each one as a still
+	// of its final frame. play() is disabled because the integration's
+	// IntersectionObserver calls it whenever the animation scrolls into view.
+	const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+	document.addEventListener("astro-lottie-loaded", (event) => {
+		if (!reduceMotion.matches) return;
+		const { detail } = event as CustomEvent;
+		for (const animation of detail.getAllAnimations()) {
+			if (!animation.isLoaded) continue;
+			const player = animation.player;
+			player.play = () => {};
+			player.goToAndStop(player.totalFrames - 1, true);
+		}
+	});
+</script>
 
 <style>
 	body {
@@ -31,6 +52,44 @@ const { frontmatter, structuredData } = Astro.props;
 		margin: 0;
 	}
 
+	/* Hidden until it receives keyboard focus, then shown top left.
+	   Each page marks where its main content starts with the id "content". */
+	.skip-link {
+		position: absolute;
+		top: 0.5rem;
+		left: 1.25rem;
+		z-index: 100;
+		margin: 0;
+		/* The hue of the "aliens" easter egg green (#1bb367), darkened to
+		   pass WCAG AA contrast: 5.25:1 on white, 4.82:1 on #f5f5f7. */
+		color: #137c47;
+		transform: translateY(calc(-100% - 1rem));
+	}
+
+	/* Same drawing underline as the header nav, in green. */
+	.skip-link::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		bottom: -4px;
+		width: 100%;
+		height: 2px;
+		border-radius: 2px;
+		background-color: #137c47;
+		transform-origin: right;
+		transform: scaleX(0);
+		transition: transform 0.3s ease-in-out;
+	}
+
+	.skip-link:focus {
+		transform: none;
+		outline: none;
+	}
+
+	.skip-link:focus::before {
+		transform-origin: left;
+		transform: scaleX(1);
+	}
 </style>
 
 <style is:global>
@@ -70,19 +129,34 @@ const { frontmatter, structuredData } = Astro.props;
 		padding-right: 20px;
 	}
 
+	/* Easter egg: hovering the struck-through word reveals the hover text.
+	   The hover text is laid over the word instead of replacing it, so the
+	   word's box keeps its size and the heading never reflows. (Swapping
+	   the text made the heading jump lines, which moved the word away from
+	   the mouse and made it flicker.) */
 	article h2 del {
+		position: relative;
+		display: inline-block;
 		text-decoration: #b31b1b line-through;
 	}
 
-	article h2 del:hover:before {
+	article h2 del::before {
 		content: attr(data-hovertext);
+		position: absolute;
+		top: 0;
+		left: 0;
 		color: #1bb367;
-		font-size: 1.5rem;
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	article h2 del:hover {
-		font-size: 0;
-		text-decoration: none;
+		color: transparent;
+		text-decoration-color: transparent;
+	}
+
+	article h2 del:hover::before {
+		opacity: 1;
 	}
 
 	h2 {
