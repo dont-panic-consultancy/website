@@ -1,22 +1,313 @@
 ---
-import LottieAnimation from "astro-integration-lottie/Lottie.astro";
+// The letters of "panic" fall out of the logo (the first beat of the hero:
+// you panic, everything falls apart). The shapes, the five letters and the
+// dot of the "i", are read from src/assets/logo.svg at build time, so they
+// always match the logo.
+//
+// The motion was converted keyframe by keyframe from the former Lottie
+// animation (falling.json, 30 fps): the same paths, rotations and easing per
+// step, played 1.3x faster. The fall ends at 2.33 s. Hero.astro owns the rest
+// of the timeline (the fades) and the rules for when the letters show at all.
+import logo from "../assets/logo.svg?raw";
+
+/** The opening tag of the logo element with this id or Inkscape label. */
+function element(tag: string, key: string, value: string) {
+	const found = logo.match(
+		new RegExp(`<${tag}\\b[^>]*\\s${key}="${value}"[^>]*>`),
+	)?.[0];
+	if (!found) throw new Error(`<${tag} ${key}="${value}"> not found in logo.svg`);
+	return (name: string) =>
+		found.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
+}
+
+// The pivot of each shape in logo units, the point it moves and turns
+// around, taken from the Lottie's first keyframe.
+const letters = (
+	[
+		["p", 13.28, 27.885],
+		["a", 34.69, 24.239],
+		["n", 58.69, 24.135],
+		["i", 76.005, 24.25],
+		["c", 91.568, 24.198],
+	] as const
+).map(([label, x, y]) => {
+	const attribute = element("path", "inkscape:label", label);
+	return { label, x, y, d: attribute("d"), transform: attribute("transform") };
+});
+
+const dotAttribute = element("circle", "id", "path3");
+const dot = {
+	x: 76.104,
+	y: 9.258,
+	cx: dotAttribute("cx"),
+	cy: dotAttribute("cy"),
+	r: dotAttribute("r"),
+	style: dotAttribute("style"),
+};
 ---
 
-<div class="container">
-    <LottieAnimation src="falling.json" autoplay="visible" loop={false} />
-</div>
+<svg
+	class="falling"
+	viewBox="-0.99 3.59 105.83 105.83"
+	preserveAspectRatio="xMidYMax meet"
+	aria-hidden="true"
+	focusable="false"
+>
+	{
+		letters.map(({ label, x, y, d, transform }) => (
+			<g transform={`translate(${x} ${y})`}>
+				<g class={`shape letter-${label}`}>
+					<g transform={`translate(${-x} ${-y})`}>
+						<path d={d} transform={transform} />
+					</g>
+				</g>
+			</g>
+		))
+	}
+	<g transform={`translate(${dot.x} ${dot.y})`}>
+		<g class="shape letter-dot">
+			<g transform={`translate(${-dot.x} ${-dot.y})`}>
+				<circle cx={dot.cx} cy={dot.cy} r={dot.r} style={dot.style} />
+			</g>
+		</g>
+	</g>
+</svg>
 
 <style>
-    .container {
-        pointer-events: none;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 50%;
-    }
-    @media only screen and (max-width: 600px) {
-        .container {
-            display: none;
-        }
-    }
+	.falling {
+		display: block;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	.shape {
+		transform-origin: 0 0;
+		animation-duration: 2.333s;
+		animation-fill-mode: both;
+	}
+
+	/* A letter runs two animations, one for its path and one for its
+	   rotation, because their keyframes fall on different frames. */
+	.letter-p { animation-name: fall-p-move, fall-p-turn; }
+	.letter-a { animation-name: fall-a-move, fall-a-turn; }
+	.letter-n { animation-name: fall-n-move, fall-n-turn; }
+	.letter-i { animation-name: fall-i-move, fall-i-turn; }
+	.letter-c { animation-name: fall-c-move, fall-c-turn; }
+
+	/* The dot of the "i" shakes with the letters, then rolls down a smooth
+	   path through the Lottie's stops at an even pace, and lands at 3.3 s.
+	   Its keyframes are samples of that path, so they are joined linearly. */
+	.letter-dot {
+		animation-name: fall-dot-move;
+		animation-duration: 3.3s;
+		animation-timing-function: linear;
+	}
+
+	/* Generated from falling.json: percentages are Lottie frames / 91,
+	   translations are in logo units from the pivot. */
+	@keyframes fall-dot-move {
+		0% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		0.777% { translate: 1px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		1.554% { translate: 0.944px -1.334px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.108% { translate: 0.356px -1.334px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.885% { translate: 0.094px 0.424px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		4.662% { translate: 0.326px 0.394px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		5.439% { translate: 0.778px 0.125px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		7.77% { translate: 1.537px 0.094px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		8.547% { translate: 1.844px 0.561px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		10.101% { translate: 0.429px -1.334px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		11.655% { translate: 1.24px -1.334px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		12.432% { translate: 1.93px -0.001px; animation-timing-function: cubic-bezier(0, 0, 0.36, 1); }
+		14.763% { translate: 0px 0px; }
+		16.539% { translate: -0.001px 0.791px; }
+		18.315% { translate: 0.002px 1.614px; }
+		20.09% { translate: 0.011px 2.499px; }
+		21.866% { translate: 0.026px 3.475px; }
+		23.642% { translate: 0.048px 4.571px; }
+		25.418% { translate: 0.08px 5.813px; }
+		27.193% { translate: 0.122px 7.224px; }
+		28.969% { translate: 0.177px 8.825px; }
+		30.745% { translate: 0.247px 10.634px; }
+		32.521% { translate: 0.331px 12.663px; }
+		34.296% { translate: 0.429px 14.924px; }
+		36.072% { translate: 0.54px 17.422px; }
+		37.848% { translate: 0.659px 20.16px; }
+		39.624% { translate: 0.779px 23.135px; }
+		41.4% { translate: 0.888px 26.343px; }
+		43.175% { translate: 0.965px 29.773px; }
+		44.951% { translate: 0.972px 33.412px; }
+		46.727% { translate: 0.833px 37.238px; }
+		48.503% { translate: 0.313px 41.198px; }
+		50.278% { translate: -1.942px 44.48px; }
+		52.054% { translate: -6.098px 44.436px; }
+		53.83% { translate: -10.254px 43.134px; }
+		55.606% { translate: -14.624px 42.77px; }
+		57.382% { translate: -18.8px 44.276px; }
+		59.157% { translate: -22.72px 46.377px; }
+		60.933% { translate: -26.413px 48.8px; }
+		62.709% { translate: -29.839px 51.488px; }
+		64.485% { translate: -32.889px 54.464px; }
+		66.26% { translate: -35.279px 57.837px; }
+		68.036% { translate: -36px 61.697px; }
+		69.812% { translate: -34.636px 65.252px; }
+		71.588% { translate: -32.6px 68.265px; }
+		73.363% { translate: -30.448px 70.937px; }
+		75.139% { translate: -28.38px 73.391px; }
+		76.915% { translate: -26.506px 75.706px; }
+		78.691% { translate: -24.92px 77.939px; }
+		80.467% { translate: -23.71px 80.126px; }
+		82.242% { translate: -22.718px 82.16px; }
+		84.018% { translate: -21.874px 84.008px; }
+		85.794% { translate: -21.152px 85.667px; }
+		87.57% { translate: -20.529px 87.143px; }
+		89.345% { translate: -19.987px 88.447px; }
+		91.121% { translate: -19.513px 89.595px; }
+		92.897% { translate: -19.092px 90.607px; }
+		94.673% { translate: -18.715px 91.508px; }
+		96.448% { translate: -18.369px 92.322px; }
+		98.224% { translate: -18.044px 93.078px; }
+		100% { translate: -17.726px 93.803px; }
+	}
+	@keyframes fall-c-move {
+		0% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		1.099% { translate: -2px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { translate: -0.824px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		5.495% { translate: -3.106px 0.477px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		7.692% { translate: -0.993px 0.409px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		9.89% { translate: -3.451px 0.341px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		20.879% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		48.352% { translate: 0.965px 35.871px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		79.121% { translate: 0.547px 72.506px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		87.912% { translate: -4.574px 75.179px; }
+		100% { translate: -4.574px 75.179px; }
+	}
+	@keyframes fall-c-turn {
+		0% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		1.099% { rotate: -4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { rotate: 2deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		9.89% { rotate: -6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		13.187% { rotate: 5deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		20.879% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		57.143% { rotate: -43deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		65.934% { rotate: -64deg; }
+		100% { rotate: -64deg; }
+	}
+	@keyframes fall-i-move {
+		0% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		1.099% { translate: -1px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		2.198% { translate: 1.059px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { translate: -0.007px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		6.593% { translate: -2.391px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		9.89% { translate: -8.711px 0.239px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		19.78% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		65.934% { translate: 0.682px 73.699px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		87.912% { translate: -1.706px 76.614px; }
+		100% { translate: -1.706px 76.614px; }
+	}
+	@keyframes fall-i-turn {
+		0% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		1.099% { rotate: -1deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		2.198% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { rotate: -3deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		4.396% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		6.593% { rotate: 11deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		9.89% { rotate: -12deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		19.78% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		23.077% { rotate: 6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		25.275% { rotate: -8deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		28.571% { rotate: 11deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		57.143% { rotate: -5deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		65.934% { rotate: -40deg; }
+		100% { rotate: -40deg; }
+	}
+	@keyframes fall-n-move {
+		0% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.55, 0.06, 1, 1); }
+		1.099% { translate: -2px -0px; animation-timing-function: cubic-bezier(0, 0, 0.36, 1); }
+		2.198% { translate: -2.875px -0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		7.692% { translate: 1.083px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		9.89% { translate: -5.952px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		14.286% { translate: 0.32px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		18.681% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.22, 0.61, 1, 1); }
+		27.473% { translate: 0.341px 7.506px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		42.857% { translate: -2.829px 19.199px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		58.242% { translate: 2.73px 26.47px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		80.22% { translate: -1.024px 45.406px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		91.209% { translate: 2.388px 74.286px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		100% { translate: -0.427px 75.598px; }
+	}
+	@keyframes fall-n-turn {
+		0% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { rotate: 3deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		6.593% { rotate: -3deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		8.791% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		10.989% { rotate: -7deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		13.187% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		18.681% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		53.846% { rotate: -59deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		62.637% { rotate: -6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		72.527% { rotate: 30deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		80.22% { rotate: 144deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		100% { rotate: 178deg; }
+	}
+	@keyframes fall-a-move {
+		0% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.55, 0.06, 0.36, 1); }
+		3.297% { translate: 1px -0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		5.495% { translate: -1.019px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		7.692% { translate: 0.008px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		9.89% { translate: -1.992px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		12.088% { translate: -0.858px 0px; animation-timing-function: cubic-bezier(0.65, 0, 1, 1); }
+		14.286% { translate: 1.257px 0px; animation-timing-function: cubic-bezier(0, 0, 0.36, 1); }
+		28.571% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.22, 0.61, 1, 1); }
+		49.451% { translate: 2.756px 32.965px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		89.011% { translate: -1.706px 56.981px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		98.901% { translate: 6.258px 74.312px; }
+		100% { translate: 6.258px 74.312px; }
+	}
+	@keyframes fall-a-turn {
+		0% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		2.198% { rotate: -8deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		5.495% { rotate: -7deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		8.791% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		12.088% { rotate: -4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		14.286% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		18.681% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		60.44% { rotate: -29deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		70.33% { rotate: -40deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		75.824% { rotate: -35deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		90.11% { rotate: 86deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		98.901% { rotate: 151deg; }
+		100% { rotate: 151deg; }
+	}
+	@keyframes fall-p-move {
+		0% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.55, 0.06, 0.36, 1); }
+		3.297% { translate: -1px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		6.593% { translate: 1.24px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		9.89% { translate: -1.217px 0px; animation-timing-function: cubic-bezier(0.65, 0, 0.36, 1); }
+		13.187% { translate: 1.392px 0px; animation-timing-function: cubic-bezier(0.65, 0, 1, 1); }
+		17.582% { translate: 0px 0px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		46.154% { translate: 1.636px 41.479px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		83.516% { translate: 3.63px 71.968px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		85.714% { translate: 3.568px 69.297px; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		98.901% { translate: 4.867px 73.358px; }
+		100% { translate: 4.867px 73.358px; }
+	}
+	@keyframes fall-p-turn {
+		0% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		1.099% { rotate: 3deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		2.198% { rotate: -6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		3.297% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		5.495% { rotate: -6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		6.593% { rotate: 6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		8.791% { rotate: -6deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		10.989% { rotate: 4deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		13.187% { rotate: -5deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		17.582% { rotate: 0deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		75.824% { rotate: 94deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		91.209% { rotate: 87deg; animation-timing-function: cubic-bezier(0.167, 0.167, 0.833, 0.833); }
+		98.901% { rotate: 37deg; }
+		100% { rotate: 37deg; }
+	}
 </style>

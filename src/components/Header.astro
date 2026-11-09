@@ -2,18 +2,17 @@
 import svgLogo from "../assets/logo.svg";
 import { Image } from "astro:assets";
 
-const { animate = false } = Astro.props;
 const hasSidebar = Astro.slots.has("sidebar");
 ---
 
-<header class:list={["header-top", { animate }]}>
+<header class="header-top">
     <a href="/" class="logo-link">
         <Image
             src={svgLogo}
             format="svg"
             alt="don't panic logo"
             width={300}
-            loading="lazy"
+            loading="eager"
         />
     </a>
 
@@ -55,19 +54,6 @@ const hasSidebar = Astro.slots.has("sidebar");
         display: flex;
         align-items: center;
         justify-content: space-between;
-    }
-
-    .header-top.animate {
-        animation: appear 6s;
-    }
-
-    @keyframes appear {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
     }
 
     .primary-nav {

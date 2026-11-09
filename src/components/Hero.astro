@@ -4,16 +4,42 @@ import Scroll from "./Scroll.astro";
 import Header from "./Header.astro";
 ---
 
+<!--
+	The hero tells a three-beat story on one CSS timeline:
+	1. 0 s: the letters of "panic" shake and fall (Falling.astro, lands at 2.33 s).
+	2. 0.3 s to 4.0 s: the logo, "(Together, we)", the promise and the scroll
+	   hint fade in, linearly.
+	3. 4.0 s to 5.5 s: the fallen letters fade away.
+	Every animation lives in this file's CSS and starts with the first render,
+	so the order never depends on load timing. Without the motion media query
+	(touch devices, small screens, reduced motion) or once the visitor
+	interacts, the page shows the calm end state.
+-->
 <section class="first">
-	<Header animate />
+	<Header />
 
 	<span class="slogan-small">(Together, we)</span>
 	<h1 class="slogan" id="content">transform challenges into possibilities</h1>
-	<Falling class="fallingLetters" />
+	<div class="falling-stage">
+		<Falling />
+	</div>
 	<div class="scroll-container">
 		<Scroll />
 	</div>
 </section>
+
+<script is:inline>
+	// Any wheel, touch, key press or mouse down jumps to the end state.
+	(() => {
+		const events = ["wheel", "touchstart", "keydown", "mousedown"];
+		const options = { capture: true, passive: true };
+		const done = () => {
+			document.documentElement.classList.add("hero-done");
+			for (const type of events) removeEventListener(type, done, options);
+		};
+		for (const type of events) addEventListener(type, done, options);
+	})();
+</script>
 
 <style>
 	.first {
@@ -45,9 +71,52 @@ import Header from "./Header.astro";
 		color: #b31b1b;
 	}
 
-	.slogan,
-	.slogan-small {
-		animation: appear 6s;
+	/* The left half of the hero, from below the header to the bottom of the
+	   section. The letters scale to fit both its width and its height and
+	   sit at its bottom, so they never reach the header. The header is as
+	   tall as its logo (400x175, shown 300 px wide) plus 20 px margins. */
+	.falling-stage {
+		display: none;
+		position: absolute;
+		top: calc(300px * 175 / 400 + 40px);
+		bottom: 0;
+		left: 0;
+		width: 50%;
+		pointer-events: none;
+	}
+
+	/* Layout.astro fades every scroll hint in over 6 s; in the hero it is
+	   part of the timeline below instead. */
+	.first :global(.scroll-container) {
+		animation: none;
+	}
+
+	/* The animated sequence: only on screens wider than 600 px, with a
+	   mouse or trackpad, and without a request for reduced motion. Anything
+	   else gets the calm end state at once. */
+	@media (min-width: 601px) and (prefers-reduced-motion: no-preference) and (not ((hover: none) and (pointer: coarse))) {
+		.falling-stage {
+			display: block;
+			animation: letters-fade 1.5s linear 4s forwards;
+		}
+
+		.slogan,
+		.slogan-small,
+		.first :global(.logo-link),
+		.first :global(.scroll-container) {
+			animation: appear 3.7s linear 0.3s both;
+		}
+
+		:global(.hero-done) .falling-stage {
+			display: none;
+		}
+
+		:global(.hero-done) .slogan,
+		:global(.hero-done) .slogan-small,
+		:global(.hero-done) .first :global(.logo-link),
+		:global(.hero-done) .first :global(.scroll-container) {
+			animation: none;
+		}
 	}
 
 	@keyframes appear {
@@ -56,6 +125,13 @@ import Header from "./Header.astro";
 		}
 		to {
 			opacity: 1;
+		}
+	}
+
+	@keyframes letters-fade {
+		to {
+			opacity: 0;
+			visibility: hidden;
 		}
 	}
 
