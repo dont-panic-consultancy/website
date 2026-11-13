@@ -57,7 +57,11 @@ import Header from "./Header.astro";
 		font-weight: 300;
 		line-height: 0.95;
 		letter-spacing: -0.03em;
-		font-size: 4.5rem;
+		/* At most 4.5rem. Narrower, the longest word (about 4.8em) still fits
+		   its column, half the width less the 5rem margin, so it stays clear
+		   of the scroll hint; shorter, as on a phone held sideways, the text
+		   shrinks with the height. */
+		font-size: clamp(2.5rem, min((50vw - 5rem) / 5, 14vh), 4.5rem);
 		color: #1a1a1a;
 	}
 
@@ -89,6 +93,15 @@ import Header from "./Header.astro";
 	   part of the timeline below instead. */
 	.first :global(.scroll-container) {
 		animation: none;
+	}
+
+	/* The scroll hint sits 10rem above the bottom of the hero. Rotated, it
+	   reaches about 6rem above its box and 5rem below it. On a short
+	   screen, such as a phone held sideways, it moves down so it stays
+	   below the header (11rem), but never lower than 5rem, where it would
+	   stick out of the hero. */
+	.first :global(.scroll) {
+		bottom: clamp(5rem, 100svh - 17rem, 10rem);
 	}
 
 	/* The animated sequence: only on screens wider than 600 px, with a
