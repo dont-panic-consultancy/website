@@ -2,7 +2,7 @@
 const { class: className, ...rest } = Astro.props;
 ---
 
-<div class={className + " scroll"} {...rest}>
+<div class={className + " scroll"} aria-hidden="true" {...rest}>
     scroll
     <span class="bar"></span>
 </div>

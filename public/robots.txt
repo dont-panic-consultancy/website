@@ -1,3 +1,17 @@
+# Don't Panic: search engines and AI search may read this site.
+# Collecting it to train AI models is not allowed.
+
+# AI training crawlers and training-control tokens
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: Bytespider
+Disallow: /
+
+# Everyone else, including search engines, AI search and fetches a person asks for
 User-agent: *
 Allow: /
 

@@ -3,94 +3,84 @@ import Scroll from "./Scroll.astro";
 import Bio from "./Bio.astro";
 ---
 
-<section id="about">
-	<a href="#top" class="top" aria-label="Back to top">top</a>
-	<Bio />
-	<article class="about">
-		<p>
-			We all lose sight of the opportunity sometimes. Thoughts and
-			discussions spiral through a maze of competing solutions,
-			requirements, and constraints.
-		</p>
-		<p>
-			The day-to-day likely prevails, and short-term wins are celebrated.
-			Systems become legendary. Everyone knows them by name; many regard
-			them as heritage; few know how they work.
-		</p>
-		<p>
-			That's where I step in, quietly and focused. You'll notice the
-			results. Here is how.
-		</p>
-	</article>
+<section id="the-problem" aria-labelledby="problem-h">
+  <a href="#top" class="top" aria-label="Back to top">top</a>
+  <Bio />
+  <article class="about">
+    <p>
+      We all lose sight of the opportunity sometimes. Discussions get stuck in
+      the weeds until nothing gets decided. The day-to-day prevails, while
+      short-term wins are celebrated. Teams build their own copies to keep
+      control. Everyone asks when it will be ready, but nobody dares to say.
+    </p>
+    <p>
+      That’s where I quietly step in. I can take on a range of roles for a
+      while, whether you’re looking for product, engineering, architecture or
+      executive leadership. My expertise is in digital platforms, data and AI.
+    </p>
+  </article>
 
-	<div class="pillars">
-		<article class="pillar_1">
-			<h2><span>01.</span>Listen</h2>
-			<p>
-				Innovation starts with understanding your team, not just your
-				tech stack.
-			</p>
-		</article>
-		<article class="pillar_2">
-			<h2><span>02.</span>Simplify</h2>
-			<p>
-				Together, we strip away the unnecessary to create systems that
-				feel natural to use.
-			</p>
-		</article>
-		<article class="pillar_3">
-			<h2><span>03.</span>Deliver</h2>
-			<p>
-				Real-world impact is the only metric that matters for long-term
-				success.
-			</p>
-		</article>
-	</div>
-	<div class="scroll-container">
-		<Scroll />
-	</div>
+  <div class="pillars">
+    <article class="pillar_1">
+      <h2>Back on track</h2>
+      <p>
+        Modernisation stops competing with the business when you make it part
+        of your organisation and culture. That change starts when leaders turn
+        what they say into how the work is done.
+      </p>
+    </article>
+    <article class="pillar_2">
+      <h2>At your pace</h2>
+      <p>
+        Teams keep moving at the speed your customers demand. I believe the
+        easiest way has to become the right way.
+      </p>
+    </article>
+  </div>
+  <div class="scroll-container">
+    <Scroll />
+  </div>
 </section>
 
 <style>
-	.about {
-		grid-column: 2 / span 9;
-		grid-row: 2;
-		padding-top: 0;
-	}
+  .about {
+    grid-column: 2 / span 9;
+    grid-row: 2;
+    padding-top: 0;
+  }
 
-	.pillars {
-		grid-column: 2 / span 9;
-		grid-row: 3;
+  .pillars {
+    grid-column: 2 / span 9;
+    grid-row: 3;
 
-		display: flex;
-		justify-content: center;
-		gap: 4rem;
-	}
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+  }
 
-	.pillar_1,
-	.pillar_2,
-	.pillar_3 {
-		flex: 1 1 0;
-		min-width: 0;
-	}
+  .pillar_1,
+  .pillar_2 {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 
-	/* Below this width the pillar columns get too narrow for their
+  /* Below this width the pillar columns get too narrow for their
 	   titles, forcing a mid-word break, so stack the pillars instead. */
-	@media screen and (max-width: 1153px) {
-		.pillars {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 1.5rem;
-		}
-	}
+  @media screen and (max-width: 1153px) {
+    .pillars {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5rem;
+    }
+  }
 
-	@media screen and (max-width: 600px) {
-		.about {
-			grid-column: 1 / span 12;
-		}
+  @media screen and (max-width: 600px) {
+    .about {
+      grid-column: 1 / span 12;
+    }
 
-		.pillars {
-			grid-column: 1 / span 12;
-		}
-	}
+    .pillars {
+      grid-column: 1 / span 12;
+    }
+  }
 </style>
